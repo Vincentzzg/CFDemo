@@ -190,7 +190,7 @@ extern void __CFGenericValidateType_(CFTypeRef cf, CFTypeID type, const char *fu
 #define CF_INFO_BITS (!!(__CF_BIG_ENDIAN__) * 3)
 #define CF_RC_BITS (!!(__CF_LITTLE_ENDIAN__) * 3)
 
-/* Bit manipulation macros */
+/* 位操作宏 Bit manipulation macros */
 /* Bits are numbered from 31 on left to 0 on right */
 /* May or may not work if you use them on bitfields in types other than UInt32, bitfields the full width of a UInt32, or anything else for which they were not designed. */
 /* In the following, N1 and N2 specify an inclusive range N2..N1 with N1 >= N2 */

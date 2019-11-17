@@ -362,21 +362,26 @@ CFTypeID CFArrayGetTypeID(void) {
     return __kCFArrayTypeID;
 }
 
+/// 初始化数组
+/// @param allocator 内存分配器
+/// @param flags 可变/不可变标记
+/// @param capacity 容量
+/// @param callBacks 回调
 static CFArrayRef __CFArrayInit(CFAllocatorRef allocator, UInt32 flags, CFIndex capacity, const CFArrayCallBacks *callBacks) {
     struct __CFArray *memory;
     UInt32 size;
     __CFBitfieldSetValue(flags, 31, 2, 0);
     if (CF_IS_COLLECTABLE_ALLOCATOR(allocator)) {
-	if (!callBacks || (callBacks->retain == NULL && callBacks->release == NULL)) {
-	    __CFBitfieldSetValue(flags, 4, 4, 1); // setWeak
-	}
+        if (!callBacks || (callBacks->retain == NULL && callBacks->release == NULL)) {
+            __CFBitfieldSetValue(flags, 4, 4, 1); // setWeak
+        }
     }
     if (__CFArrayCallBacksMatchNull(callBacks)) {
-	__CFBitfieldSetValue(flags, 3, 2, __kCFArrayHasNullCallBacks);
+        __CFBitfieldSetValue(flags, 3, 2, __kCFArrayHasNullCallBacks);
     } else if (__CFArrayCallBacksMatchCFType(callBacks)) {
-	__CFBitfieldSetValue(flags, 3, 2, __kCFArrayHasCFTypeCallBacks);
+        __CFBitfieldSetValue(flags, 3, 2, __kCFArrayHasCFTypeCallBacks);
     } else {
-	__CFBitfieldSetValue(flags, 3, 2, __kCFArrayHasCustomCallBacks);
+        __CFBitfieldSetValue(flags, 3, 2, __kCFArrayHasCustomCallBacks);
     }
     size = __CFArrayGetSizeOfType(flags) - sizeof(CFRuntimeBase);
     switch (__CFBitfieldGetValue(flags, 1, 0)) {
@@ -435,14 +440,16 @@ CF_PRIVATE CFArrayRef __CFArrayCreateTransfer(CFAllocatorRef allocator, const vo
     return (CFArrayRef)memory;
 }
 
+/// 私有方法，CFArrayCreate方法调用这个方法创建数组
 CF_PRIVATE CFArrayRef __CFArrayCreate0(CFAllocatorRef allocator, const void **values, CFIndex numValues, const CFArrayCallBacks *callBacks) {
     CFArrayRef result;
     const CFArrayCallBacks *cb;
-    struct __CFArrayBucket *buckets;
+    struct __CFArrayBucket *buckets;//桶
     CFAllocatorRef bucketsAllocator;
     void* bucketsBase;
     CFIndex idx;
     CFAssert2(0 <= numValues, __kCFLogAssertion, "%s(): numValues (%d) cannot be less than zero", __PRETTY_FUNCTION__, numValues);
+    //初始化数组
     result = __CFArrayInit(allocator, __kCFArrayImmutable, numValues, callBacks);
     cb = __CFArrayGetCallBacks(result);
     buckets = __CFArrayGetBucketsPtr(result);
@@ -527,6 +534,11 @@ CF_PRIVATE CFMutableArrayRef __CFArrayCreateMutableCopy0(CFAllocatorRef allocato
 
 #if DEFINE_CREATION_METHODS
 
+/// 暴露给外部的创建array的方法
+/// @param allocator 内存分配器
+/// @param values C数组
+/// @param numValues 数组的大小
+/// @param callBacks 回调
 CFArrayRef CFArrayCreate(CFAllocatorRef allocator, const void **values, CFIndex numValues, const CFArrayCallBacks *callBacks) {
     return __CFArrayCreate0(allocator, values, numValues, callBacks);
 }
@@ -683,6 +695,7 @@ CFIndex CFArrayGetLastIndexOfValue(CFArrayRef array, CFRange range, const void *
     return kCFNotFound;
 }
 
+/// 数组添加元素
 void CFArrayAppendValue(CFMutableArrayRef array, const void *value) {
     CF_OBJC_FUNCDISPATCHV(CFArrayGetTypeID(), void, (NSMutableArray *)array, addObject:(id)value);
     
